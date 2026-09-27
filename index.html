@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campus Chaos: Pixel Semester</title>
+<style>
+*{box-sizing:border-box}
+:root{--ink:#111;--paper:#f7f0df;--yellow:#ffd84d;--pink:#ff7eb6;--blue:#73d2ff;--green:#8ee38e;--red:#ff6961}
+body{margin:0;background:#e8e1d1;color:var(--ink);font-family:Arial,Helvetica,sans-serif}
+button{font:inherit;font-weight:900;border:4px solid var(--ink);background:white;padding:12px 14px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);transition:.08s}
+button:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+button:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 var(--ink)}
+.wrap{max-width:1250px;margin:auto;padding:18px}
+header{border:5px solid var(--ink);background:var(--yellow);padding:18px;box-shadow:9px 9px 0 var(--ink);margin-bottom:18px}
+h1{font-size:clamp(32px,6vw,68px);margin:0;line-height:.9;text-transform:uppercase}
+.subtitle{font-weight:900;margin-top:12px}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}
+.card{border:4px solid var(--ink);background:var(--paper);box-shadow:7px 7px 0 var(--ink);padding:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{border:3px solid var(--ink);padding:10px;background:white}
+.stat b{font-size:24px;display:block}
+.bar{height:10px;border:2px solid var(--ink);margin-top:6px;background:#ddd}
+.fill{height:100%;width:0;background:var(--blue)}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.location{min-height:125px;text-align:left;position:relative}
+.location span{font-size:34px;display:block}
+.location small{display:block;margin-top:8px;font-weight:700}
+.lib{background:#bde8ff}.caf{background:#ffb6d5}.club{background:#c6f29d}.lab{background:#d9c3ff}
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.action.study{background:var(--blue)}.action.work{background:var(--green)}.action.fun{background:var(--pink)}
+h2{margin:0 0 12px;text-transform:uppercase}
+h3{margin:10px 0 5px}
+.shop,.quests{display:grid;gap:10px}
+.item{border:3px solid var(--ink);background:white;padding:11px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.item p{margin:3px 0;font-size:13px;font-weight:700}
+.item button{padding:8px 10px;box-shadow:3px 3px 0 var(--ink)}
+.feed{height:180px;overflow:auto;background:#161616;color:#fff;border:4px solid var(--ink);padding:10px;font-family:monospace;font-size:13px}
+.feed div{margin-bottom:7px}
+.quote{background:var(--pink);border:4px solid var(--ink);padding:12px;font-weight:900;margin-top:12px}
+.footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.soundOn{background:var(--green)!important}.soundOff{background:#ddd!important}
+.modal{position:fixed;inset:0;background:#0009;display:none;place-items:center;padding:18px;z-index:20}
+.modal.show{display:grid}
+.modalbox{position:relative;width:min(560px,100%);border:5px solid var(--ink);background:var(--paper);box-shadow:10px 10px 0 #000;padding:20px}
+.gamearea{border:4px solid var(--ink);background:white;padding:20px;text-align:center;min-height:190px}
+.big{font-size:48px;font-weight:900;margin:12px}
+.sequence{font-size:35px;letter-spacing:8px}
+
+/* Pixel Arcade */
+.phoneBtn{background:#b9a7ff!important;font-size:22px;min-height:90px}
+.arcade{background:#171717;color:#fff;border:5px solid #111;box-shadow:10px 10px 0 #111}
+.arcade h2{color:#fff}
+.arcadeGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.arcadeGame{background:#ffd84d;color:#111;border:4px solid #000;padding:14px;min-height:145px;text-align:left;touch-action:manipulation}
+.arcadeGame:nth-child(2){background:#8ee38e}.arcadeGame:nth-child(3){background:#73d2ff}
+.arcadeGame b{font-size:20px}.arcadeGame p{font-size:13px}
+.pixelCanvas{display:block;user-select:none;-webkit-user-select:none;width:min(100%,480px);height:auto;image-rendering:pixelated;border:6px solid #fff;background:#050505;margin:10px auto;touch-action:none}
+.arcadeInfo{text-align:center;font-family:monospace;min-height:22px}
+.pixelControls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px auto;max-width:360px}
+.pixelControls button{min-width:62px;min-height:52px;padding:8px;background:#fff;touch-action:manipulation}
+.pixelControls .wide{min-width:132px}
+.pixelTitle{text-align:center;color:#fff;font-family:monospace;letter-spacing:2px}
+@media(max-width:650px){
+  .arcadeGrid{grid-template-columns:1fr}
+  .arcadeGame{min-height:105px}
+  .modal{padding:8px}
+  .modalbox{padding:12px;max-height:96vh;overflow:auto}
+}
+
+/* Polished campus locations */
+.campusStatus{border:4px solid #111;background:#111;color:#fff;padding:10px;margin:12px 0;font-family:monospace;font-weight:900;min-height:42px}
+.location{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;overflow:hidden}
+.location .locTop{display:flex;align-items:center;gap:10px}
+.location .locIcon{font-size:42px}
+.location .locTitle{font-size:22px;font-weight:1000;text-transform:uppercase}
+.location small{font-size:13px;line-height:1.25}
+.location .go{align-self:stretch;margin-top:10px;background:#fff;border:3px solid #111;padding:8px;font-weight:1000;text-align:center}
+.caf{background:#ffb6d5}.club{background:#c6f29d}
+.caf:hover{background:#ff9fc9}.club:hover{background:#aef080}
+.foodPanel,.clubPanel{border:4px solid #111;background:white;padding:14px;margin-top:12px;display:none}
+.foodPanel.show,.clubPanel.show{display:block}
+.meter{height:18px;border:3px solid #111;background:#ddd;margin:8px 0}.meter i{display:block;height:100%;width:0;background:#ff7eb6}
+.clubPanel{background:#161616;color:white}.clubPanel button{margin-top:8px}
+
+/* Final responsive arcade shell */
+#arcadeModal{overflow-y:auto!important;overflow-x:hidden!important;align-items:flex-start!important;padding:12px!important;-webkit-overflow-scrolling:touch}
+#arcadeModal .modalbox{width:min(900px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow-y:auto;overflow-x:hidden;margin:auto;padding:16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#arcadeGameArea{width:100%;overflow:visible}
+#arcadeGameArea .pixelCanvas{max-width:100%;width:auto;height:auto;display:block;margin:12px auto}
+.pixelControls{position:relative;z-index:5}
+.pixelControls button{min-width:68px;min-height:58px;font-size:16px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#pixelTapControls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.pixelTargetHint{font-family:monospace;text-align:center;font-weight:900;margin:6px}
+@media(max-width:650px){
+  #arcadeModal{padding:6px!important}
+  #arcadeModal .modalbox{width:calc(100vw - 12px);max-height:calc(100dvh - 12px);padding:10px}
+  #arcadeGameArea .pixelCanvas{width:100%;height:auto;max-height:58vh;object-fit:contain}
+  .pixelControls button{min-height:60px;min-width:72px}
+}
+
+#restartArcade{background:#ffd84d!important}
+#restartArcade:hover{background:#ffe477!important}
+@media(max-width:650px){
+  #restartArcade,#closeArcade{width:100%;min-height:52px}
+}
+
+#restartArcade{background:#ffd84d!important;min-height:52px}
+#restartArcade:hover{background:#ffe477!important}
+
+/* Victory / progression screen */
+.winScreen{position:absolute;inset:0;background:rgba(10,10,10,.94);display:grid;place-items:center;padding:18px;z-index:50}
+.winCard{width:min(520px,100%);background:#ffd84d;color:#111;border:5px solid #111;box-shadow:10px 10px 0 #000;padding:24px;text-align:center}
+.winCard .trophy{font-size:64px;line-height:1}
+.winCard h2{font-size:34px;margin:8px 0}
+.winCard .smart{font-size:20px;font-weight:1000;margin:8px 0}
+.winCard .reward{font-family:monospace;font-weight:900;background:white;border:3px solid #111;padding:10px;margin:12px 0}
+.winCard button{width:100%;margin-top:8px;min-height:52px}
+.winCard .next{background:#8ee38e}
+.winCard .again{background:#73d2ff}
+
+#memoryButtons button{background:#73d2ff;font-size:28px;font-family:monospace}
+#memoryButtons button:active{background:#8ee38e}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.actions{grid-template-columns:1fr}.map{grid-template-columns:1fr}.wrap{padding:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>Campus Chaos:<br>Pixel Semester</h1>
+<div class="subtitle">Study. Hustle. Chill. Level Up. • A THIRAZEN™ Pixel Campus RPG</div>
+<div style="margin-top:14px;font-family:monospace;font-weight:1000;letter-spacing:3px;font-size:14px">THIRAZEN™</div>
+</header>
+
+<div class="stats">
+<div class="stat">📚 Knowledge <b id="knowledge">0</b><div class="bar"><div id="kb" class="fill"></div></div></div>
+<div class="stat">💰 Money <b id="money">0</b><div class="bar"><div id="mb" class="fill"></div></div></div>
+<div class="stat">😎 Fun <b id="fun">0</b><div class="bar"><div id="fb" class="fill"></div></div></div>
+<div class="stat">❤️ Energy <b id="energy">100</b><div class="bar"><div id="eb" class="fill"></div></div></div>
+</div>
+
+<div class="grid">
+<main>
+<section class="card">
+<h2>🗺️ Campus</h2>
+<button id="phoneBtn" class="phoneBtn">📱 Student Phone — PIXEL ARCADE</button>
+<div class="map">
+<button class="location lib" data-place="Library">
+  <div class="locTop"><span class="locIcon">📚</span><span class="locTitle">Library</span></div>
+  <small>Study challenge → Knowledge + XP</small><span class="go">ENTER LIBRARY →</span>
+</button>
+<button class="location caf" data-place="Cafeteria">
+  <div class="locTop"><span class="locIcon">🍔</span><span class="locTitle">Cafeteria</span></div>
+  <small>Eat food → restore Energy</small><span class="go">ENTER CAFETERIA →</span>
+</button>
+<button class="location club" data-place="Club">
+  <div class="locTop"><span class="locIcon">🎸</span><span class="locTitle">Student Club</span></div>
+  <small>Play → gain Fun + Money</small><span class="go">ENTER CLUB →</span>
+</button>
+<button class="location lab" data-place="Lab">
+  <div class="locTop"><span class="locIcon">🧪</span><span class="locTitle">Computer Lab</span></div>
+  <small>Math challenge → Money + XP</small><span class="go">ENTER LAB →</span>
+</button>
+</div>
+<div id="campusStatus" class="campusStatus">📍 Choose a campus location.</div>
+<div id="foodPanel" class="foodPanel">
+  <h3>🍔 CAFETERIA</h3>
+  <p><b>Today's special:</b> Mega Student Meal</p>
+  <div class="meter"><i id="foodMeter"></i></div>
+  <p id="foodText">Your energy is ready for a refill.</p>
+  <button id="eatBtn">🍔 BUY MEAL — 5 MONEY</button>
+  <button id="snackBtn">🥤 QUICK SNACK — 2 MONEY</button>
+</div>
+<div id="clubPanel" class="clubPanel">
+  <h3>🎸 STUDENT CLUB</h3>
+  <p>Pick a club activity. Each activity gives Fun and can earn a little cash.</p>
+  <button id="musicBtn">🎸 MUSIC JAM +12 FUN</button>
+  <button id="gameNightBtn">🕹️ GAME NIGHT +15 FUN</button>
+  <button id="openMicBtn">🎤 OPEN MIC +10 FUN +5 MONEY</button>
+</div>
+<h2>⚡ Quick Actions</h2>
+<div class="actions">
+<button class="action study" id="study">📖 Study<br>+8 Knowledge</button>
+<button class="action work" id="work">💼 Hustle<br>+7 Money</button>
+<button class="action fun" id="chill">🎮 Chill<br>+10 Fun</button>
+</div>
+<div class="quote" id="quote"></div>
+</section>
+
+<section class="card" style="margin-top:18px">
+<h2>📜 Quests</h2>
+<div class="quests" id="quests"></div>
+</section>
+</main>
+
+<aside>
+<section class="card">
+<h2>⬆️ Upgrades</h2>
+<div class="shop" id="shop"></div>
+</section>
+
+<section class="card" style="margin-top:18px">
+<h2>📟 Feed</h2>
+<div class="feed" id="feed"></div>
+<div style="margin-top:12px;text-align:center;font-family:monospace;font-weight:1000;letter-spacing:2px">THIRAZEN™ • CAMPUS CHAOS: PIXEL SEMESTER</div>
+<div class="footer">
+<button id="save">💾 Save</button>
+<button id="soundBtn" class="soundOn">🔊 Sound ON</button>
+<button id="reset">♻️ New Semester</button>
+</div>
+</section>
+</aside>
+</div>
+</div>
+
+
+<div class="modal" id="arcadeModal">
+<div class="modalbox arcade">
+<h2 class="pixelTitle">📱 PIXEL ARCADE</h2>
+<p class="arcadeInfo">PC: keyboard + mouse • Mobile: touch controls • Scroll inside the arcade if needed</p>
+<div class="arcadeGrid">
+<button class="arcadeGame" id="pixelDodge"><b>🚗 PIXEL DODGE</b><p>Move your car and survive 20 blocks.</p></button>
+<button class="arcadeGame" id="pixelSnake"><b>🐍 PIXEL SNAKE</b><p>Eat 10 pixels without crashing.</p></button>
+<button class="arcadeGame" id="pixelTap"><b>👾 PIXEL BLAST</b><p>Hit 12 targets before the timer ends.</p></button>
+</div>
+<div id="arcadeGameArea"></div>
+<div class="footer"><button id="restartArcade" style="background:#ffd84d">🔄 RESTART GAME</button><button id="closeArcade">📵 Put Phone Away</button></div>
+</div>
+</div>
+
+<div class="modal" id="modal">
+<div class="modalbox">
+<h2 id="gameTitle">Mini-game</h2>
+<div id="gameArea" class="gamearea"></div>
+<div class="footer"><button id="closeGame">Close</button></div>
+</div>
+</div>
+
+<script>
+"use strict";
+
+
+// Built-in sound system: uses Web Audio, so no external audio files are needed.
+let soundEnabled = localStorage.getItem("campus-chaos-sound") !== "off";
+let audioCtx = null;
+
+function audioReady(){
+  if(!soundEnabled)return null;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+function unlockAudio(){
+  const ctx=audioReady();
+  if(!ctx)return;
+  try{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    g.gain.value=0.0001;
+    o.connect(g);g.connect(ctx.destination);
+    o.start();o.stop(ctx.currentTime+0.02);
+  }catch(e){}
+}
+function tone(freq,duration=.08,type="square",volume=.035,delay=0){
+  const ctx=audioReady(); if(!ctx)return;
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0,ctx.currentTime+delay);
+  g.gain.linearRampToValueAtTime(volume,ctx.currentTime+delay+.01);
+  g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+delay+duration);
+  o.connect(g);g.connect(ctx.destination);
+  o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+duration+.02);
+}
+function sfx(name){
+  if(!soundEnabled)return;
+  if(name==="click") tone(520,.045,"square",.025);
+  if(name==="buy"){tone(440,.07,"square",.03);tone(660,.09,"square",.03,.07);}
+  if(name==="coin"){tone(700,.06,"triangle",.035);tone(950,.1,"triangle",.03,.06);}
+  if(name==="success"){tone(523,.09,"square",.035);tone(659,.09,"square",.035,.1);tone(784,.16,"square",.04,.2);}
+  if(name==="fail"){tone(180,.14,"sawtooth",.035);tone(120,.2,"sawtooth",.03,.12);}
+  if(name==="level"){tone(523,.08,"triangle",.04);tone(659,.08,"triangle",.04,.09);tone(784,.08,"triangle",.04,.18);tone(1047,.22,"triangle",.05,.27);}
+  if(name==="save"){tone(600,.05,"square",.025);tone(800,.08,"square",.025,.06);}
+}
+function updateSoundButton(){
+  const b=document.getElementById("soundBtn");
+  if(!b)return;
+  b.textContent=soundEnabled?"🔊 Sound ON":"🔇 Sound OFF";
+  b.className=soundEnabled?"soundOn":"soundOff";
+}
+
+const DEFAULT = {
+  knowledge:0, money:30, fun:10, energy:100, xp:0, level:1,
+  reputation:0, upgrades:{desk:0,laptop:0,job:0,gig:0,cafe:0,club:0,bot:0,startup:0},
+  quests:{scholar:0,hustler:0,collector:0,adventurer:0},
+  questClaimed:{scholar:false,hustler:false,collector:false,adventurer:false}
+};
+
+let s = loadState();
+let last = Date.now();
+let gameTimer = null;
+let miniCleanup = null;
+
+const $ = id => document.getElementById(id);
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function num(n){return Math.floor(n).toLocaleString();}
+function log(msg){
+  const el=document.createElement("div");
+  el.textContent="› "+msg;
+  $("feed").prepend(el);
+  while($("feed").children.length>35) $("feed").lastChild.remove();
+}
+function saveState(){
+  localStorage.setItem("campus-chaos-save",JSON.stringify(s));
+  sfx("save");
+  log("Game saved.");
+}
+function loadState(){
+  try{
+    const x=JSON.parse(localStorage.getItem("campus-chaos-save"));
+    if(x) return {...structuredClone(DEFAULT),...x,upgrades:{...DEFAULT.upgrades,...x.upgrades},quests:{...DEFAULT.quests,...x.quests},questClaimed:{...DEFAULT.questClaimed,...x.questClaimed}};
+  }catch(e){}
+  return structuredClone(DEFAULT);
+}
+function xpNeeded(){return 50+(s.level-1)*35}
+function gainXP(n){
+  s.xp+=n;
+  while(s.xp>=xpNeeded()){
+    s.xp-=xpNeeded(); s.level++;
+    s.energy=clamp(s.energy+20,0,100);
+    sfx("level"); log("LEVEL UP! You are now level "+s.level+" 🎉");
+  }
+}
+function rates(){
+  // Resources do NOT increase automatically.
+  // Money is earned only by player actions / rewards.
+  return {knowledge:0,money:0,fun:0};
+}
+const upgradeData=[
+ ["desk","Study Desk","Study bonus +2 Knowledge",35],
+ ["laptop","Old Laptop","Study bonus +1 Knowledge",70],
+ ["job","Part-Time Job","Hustle bonus +2 Money",60],
+ ["gig","Gig Machine","Hustle bonus +3 Money",140],
+ ["cafe","Campus Café","Chill bonus +1 Fun",55],
+ ["club","Student Club","Chill bonus +2 Fun",110],
+ ["bot","AI Study Bot","Study bonus +5 Knowledge",260],
+ ["startup","Student Startup","Hustle bonus +5 Money",350]
+];
+function cost(item){return Math.floor(item[3]*Math.pow(1.55,s.upgrades[item[0]]))}
+function buy(key){
+  const item=upgradeData.find(x=>x[0]===key), c=cost(item);
+  if(s.money<c){log("Not enough money for "+item[1]+".");return}
+  s.money-=c;s.upgrades[key]++;sfx("buy"); log("Bought "+item[1]+" level "+s.upgrades[key]+"!");
+  render();
+}
+const questData=[
+ ["scholar","Scholar","Reach 100 Knowledge",()=>s.knowledge>=100,25,25],
+ ["hustler","Hustler","Earn 150 Money",()=>s.money>=150,40,40],
+ ["collector","Collector","Buy 5 upgrades",()=>Object.values(s.upgrades).reduce((a,b)=>a+b,0)>=5,70,70],
+ ["adventurer","Adventurer","Reach level 3",()=>s.level>=3,90,90]
+];
+function claimQuest(q){
+ if(q[3]() && !s.questClaimed[q[0]]){
+   s.questClaimed[q[0]]=true;s.money+=q[4];gainXP(q[5]);log("Quest complete: "+q[1]+"!");
+ }
+}
+function render(){
+  $("knowledge").textContent=num(s.knowledge);
+  $("money").textContent=num(s.money);
+  $("fun").textContent=num(s.fun);
+  $("energy").textContent=num(s.energy);
+  $("kb").style.width=(s.knowledge%100)+"%";
+  $("mb").style.width=(s.money%200)/2+"%";
+  $("fb").style.width=(s.fun%100)+"%";
+  $("eb").style.width=s.energy+"%";
+  $("shop").innerHTML="";
+  upgradeData.forEach(item=>{
+    const [key,name,desc]=item,c=cost(item);
+    const d=document.createElement("div");d.className="item";
+    d.innerHTML="<div><b>"+name+" · Lv "+s.upgrades[key]+"</b><p>"+desc+"</p></div>";
+    const b=document.createElement("button");b.textContent="💰 "+num(c);b.onclick=()=>buy(key);
+    d.appendChild(b);$("shop").appendChild(d);
+  });
+  $("quests").innerHTML="";
+  questData.forEach(q=>{
+    claimQuest(q);
+    const d=document.createElement("div");d.className="item";
+    const done=s.questClaimed[q[0]];
+    d.innerHTML="<div><b>"+(done?"✅ ":"🎯 ")+q[1]+"</b><p>"+q[2]+"</p></div>";
+    const b=document.createElement("button");b.textContent=done?"CLAIMED":"CHECK";
+    b.disabled=done||!q[3]();b.onclick=()=>{claimQuest(q);render()};
+    d.appendChild(b);$("quests").appendChild(d);
+  });
+}
+function spendEnergy(n){
+  if(s.energy<n){log("Too tired. Visit the cafeteria or wait.");return false}
+  s.energy-=n;return true;
+}
+function action(type){
+  if(!spendEnergy(5))return;
+  if(type==="study"){sfx("click");s.knowledge+=8+s.upgrades.desk*2+s.upgrades.laptop;gainXP(6);s.quests.scholar++;log("Study complete: +"+(8+s.upgrades.desk*2)+" Knowledge.");}
+  if(type==="work"){sfx("coin");s.money+=7+s.upgrades.job*2+s.upgrades.gig*3+s.upgrades.startup*5;gainXP(5);s.quests.hustler++;log("Hustle complete: +"+(7+s.upgrades.job*2)+" Money.");}
+  if(type==="chill"){sfx("click");s.fun+=10+s.upgrades.cafe+s.upgrades.club*2;gainXP(4);log("Chill complete: +"+(10+s.upgrades.club*2)+" Fun.");}
+  render();
+}
+$("study").onclick=()=>action("study");
+$("work").onclick=()=>action("work");
+$("chill").onclick=()=>action("chill");
+$("save").onclick=saveState;
+$("soundBtn").onclick=()=>{
+  if(!soundEnabled){soundEnabled=true;unlockAudio();}
+  else soundEnabled=false;
+  localStorage.setItem("campus-chaos-sound",soundEnabled?"on":"off");
+  updateSoundButton();
+  if(soundEnabled)sfx("success");
+};
+updateSoundButton();
+$("reset").onclick=()=>{
+ if(confirm("Start a new semester? You keep upgrade levels and reputation, but reset basic resources.")){
+   s.knowledge=0;s.money=50;s.fun=20;s.energy=100;s.xp=0;s.level=1;
+   s.quests={scholar:0,hustler:0,collector:0,adventurer:0};
+   s.questClaimed={scholar:false,hustler:false,collector:false,adventurer:false};
+   s.reputation++;
+   sfx("level"); log("New semester! Reputation increased to "+s.reputation+".");
+   render();
+ }
+};
+document.querySelectorAll(".location").forEach(b=>b.onclick=()=>visit(b.dataset.place));
+
+const quotes=[
+"“University is 10% lectures and 90% finding a charger.”",
+"“Your GPA cannot save you from a bad Wi‑Fi signal.”",
+"“Study hard. Snack harder.”",
+"“One more upgrade. Definitely the last one.”",
+"“The exam is tomorrow. The panic is today.”",
+"“You are not procrastinating. You are generating passive income.”"
+];
+$("quote").textContent=quotes[Math.floor(Math.random()*quotes.length)];
+
+function updateCampusStatus(msg){
+  $("campusStatus").textContent=msg;
+}
+function showPanel(name){
+  $("foodPanel").classList.toggle("show",name==="food");
+  $("clubPanel").classList.toggle("show",name==="club");
+}
+function visit(place){
+  showPanel(null);
+  if(place==="Cafeteria"){
+    updateCampusStatus("🍔 You entered the Cafeteria. Choose a meal or snack.");
+    showPanel("food");
+    const pct=s.energy;
+    $("foodMeter").style.width=pct+"%";
+    $("foodText").textContent="Energy: "+Math.floor(s.energy)+"/100";
+    sfx("click");
+    return;
+  }
+  if(place==="Club"){
+    updateCampusStatus("🎸 You entered the Student Club. Pick an activity!");
+    showPanel("club");
+    sfx("click");
+    return;
+  }
+  if(!spendEnergy(8))return;
+  if(place==="Library") updateCampusStatus("📚 Library challenge opened.");
+  if(place==="Lab") updateCampusStatus("🧪 Computer Lab challenge opened.");
+  openMini(place);
+}
+
+function eatFood(cost,energyGain){
+  if(s.money<cost){log("Not enough money for food.");updateCampusStatus("💸 You need "+cost+" Money.");sfx("fail");return}
+  if(s.energy>=100){log("Your Energy is already full.");updateCampusStatus("❤️ Energy is already full.");return}
+  s.money-=cost;
+  s.energy=clamp(s.energy+energyGain,0,100);
+  sfx("coin");
+  log("🍔 Food purchased: +"+energyGain+" Energy.");
+  updateCampusStatus("😋 Delicious! Energy is now "+Math.floor(s.energy)+"/100.");
+  $("foodMeter").style.width=s.energy+"%";
+  $("foodText").textContent="Energy: "+Math.floor(s.energy)+"/100";
+  render();
+}
+function clubActivity(name,funGain,moneyGain=0){
+  if(!spendEnergy(4))return;
+  s.fun+=funGain;
+  s.money+=moneyGain;
+  gainXP(6);
+  sfx("success");
+  log("🎸 "+name+" complete! +"+funGain+" Fun"+(moneyGain?" and +"+moneyGain+" Money.":"") );
+  updateCampusStatus("🎉 "+name+" finished! Great campus vibes.");
+  render();
+}
+$("eatBtn").onclick=()=>eatFood(5,35);
+$("snackBtn").onclick=()=>eatFood(2,12);
+$("musicBtn").onclick=()=>clubActivity("Music Jam",12);
+$("gameNightBtn").onclick=()=>clubActivity("Game Night",15);
+$("openMicBtn").onclick=()=>clubActivity("Open Mic",10,5);
+
+function openMini(place){
+ $("modal").classList.add("show");
+ $("gameTitle").textContent=place+" Mini-game";
+ const area=$("gameArea");area.innerHTML="";
+ if(miniCleanup)miniCleanup();
+ miniCleanup=null;
+ if(place==="Library") memoryGame(area);
+ else if(place==="Lab") mathGame(area);
+ else targetGame(area);
+}
+function finishMini(success,reward){
+  if(success){
+    s.money+=reward.money||0;
+    s.knowledge+=reward.knowledge||0;
+    s.fun+=reward.fun||0;
+    gainXP(reward.xp||10);
+    sfx("success");
+    log("Mini-game WON! "+(reward.text||"Nice!"));
+    render();
+
+    const place=$("gameTitle").textContent.replace(" Mini-game","");
+    showWinScreen(
+      smartTitle(place),
+      "",
+      (reward.text||"Challenge completed!")+"<br>🏆 You're getting smarter!",
+      ()=>openMini(place)
+    );
+  }else{
+    sfx("fail");
+    log("Mini-game failed. No reward.");
+  }
+}
+
+function memoryGame(area){
+  // Each sequence position gets its own button instance.
+  // Repeated values such as 2-2-1-4 are therefore fully playable.
+  const seq=Array.from({length:4},()=>Math.floor(Math.random()*4)+1);
+  let pos=0;
+
+  area.innerHTML=
+    '<p>🧠 Memorize the sequence:</p>'+
+    '<div class="sequence">'+seq.join(" ")+'</div>'+
+    '<p id="count">Get ready…</p>';
+
+  const count=$("count");
+  let seconds=3;
+
+  const timer=setInterval(()=>{
+    seconds--;
+    count.textContent=seconds>0?"Starting in "+seconds+"…":"GO!";
+    if(seconds<=0){
+      clearInterval(timer);
+      showButtons();
+    }
+  },800);
+
+  function showButtons(){
+    area.innerHTML=
+      '<p>🧠 Repeat the sequence in order!</p>'+
+      '<div id="memoryButtons" class="pixelControls"></div>'+
+      '<p id="memmsg">0 / '+seq.length+'</p>';
+
+    const buttons=$("memoryButtons");
+
+    // Four separate physical buttons. Duplicate values are intentionally allowed.
+    [1,2,3,4].forEach(value=>{
+      const b=document.createElement("button");
+      b.type="button";
+      b.textContent=value;
+      b.dataset.value=value;
+      b.style.minWidth="70px";
+      b.style.minHeight="60px";
+      b.onclick=()=>pressMemory(value,b);
+      buttons.appendChild(b);
+    });
+  }
+
+  function pressMemory(value,button){
+    if(value!==seq[pos]){
+      button.animate(
+        [{transform:"translateX(-5px)"},{transform:"translateX(5px)"},{transform:"translateX(0)"}],
+        {duration:180}
+      );
+      sfx("fail");
+      $("memmsg").textContent="❌ Wrong! Start the sequence again.";
+      pos=0;
+      document.querySelectorAll("#memoryButtons button").forEach(b=>b.disabled=false);
+      return;
+    }
+
+    // IMPORTANT: Do NOT disable the number itself.
+    // The same number can be required again, e.g. 2 → 2 → 1 → 4.
+    button.animate(
+      [{transform:"scale(1)"},{transform:"scale(1.15)"},{transform:"scale(1)"}],
+      {duration:120}
+    );
+    sfx("click");
+    pos++;
+    $("memmsg").textContent=pos+" / "+seq.length;
+
+    if(pos===seq.length){
+      finishMini(true,{
+        money:25,
+        knowledge:20,
+        xp:25,
+        text:"+25 Money, +20 Knowledge, +25 XP."
+      });
+    }
+  }
+
+  // If the player closes the mini-game during the countdown, stop its timer.
+  miniCleanup=()=>clearInterval(timer);
+}
+function mathGame(area){
+ const a=Math.floor(Math.random()*20)+5,b=Math.floor(Math.random()*15)+3,ans=a+b;
+ area.innerHTML="<p>Solve quickly:</p><div class='big'>"+a+" + "+b+" = ?</div><input id='answer' inputmode='numeric' style='font-size:25px;width:120px;padding:8px;border:3px solid #111'><button id='submit'>CHECK</button><p id='mathmsg'>You have 8 seconds.</p>";
+ const input=$("answer");input.focus();
+ let done=false,remaining=8;
+ const timer=setInterval(()=>{remaining--;$("mathmsg").textContent="Time: "+remaining+"s";if(remaining<=0){clearInterval(timer);if(!done){done=true;finishMini(false,{})}}},1000);
+ function submit(){if(done)return;done=true;clearInterval(timer);finishMini(Number(input.value)===ans,{money:35,xp:25,text:"+35 money and +25 XP."})}
+ $("submit").onclick=submit;input.onkeydown=e=>{if(e.key==="Enter")submit()};
+ miniCleanup=()=>clearInterval(timer);
+}
+function targetGame(area){
+ area.innerHTML="<p>Click the target before it moves!</p><button id='target' style='font-size:45px;background:#ff6961;border-radius:50%;width:100px;height:100px;padding:0'>🎯</button><p id='targetmsg'>You have 6 seconds.</p>";
+ const target=$("target");let done=false,remaining=6;
+ function move(){target.style.marginLeft=Math.floor(Math.random()*240-120)+"px";target.style.marginTop=Math.floor(Math.random()*80-40)+"px"}
+ move();const mover=setInterval(move,500),timer=setInterval(()=>{remaining--;$("targetmsg").textContent="Time: "+remaining+"s";if(remaining<=0){clearInterval(mover);clearInterval(timer);if(!done){done=true;finishMini(false,{})}}},1000);
+ target.onclick=()=>{if(done)return;done=true;clearInterval(mover);clearInterval(timer);finishMini(true,{money:28,fun:20,xp:18,text:"+28 money, +20 fun, +18 XP."})};
+ miniCleanup=()=>{clearInterval(mover);clearInterval(timer)};
+}
+$("closeGame").onclick=()=>{$("modal").classList.remove("show");if(miniCleanup)miniCleanup();miniCleanup=null};
+$("modal").addEventListener("click",e=>{if(e.target.id==="modal")$("closeGame").click()});
+
+function tick(){
+ const now=Date.now(),dt=Math.min((now-last)/1000,5);last=now;
+ const r=rates();
+ s.knowledge+=r.knowledge*dt;
+ s.money+=r.money*dt;
+ s.fun+=r.fun*dt;
+ s.energy=clamp(s.energy+.7*dt,0,100);
+ render();
+}
+
+// ---------------- RESPONSIVE PIXEL PHONE ARCADE ----------------
+const arcadeModal=$("arcadeModal"), arcadeArea=$("arcadeGameArea");
+let arcadeCleanup=null;
+let currentArcadeGame=null;
+
+function stopArcade(){
+  if(typeof arcadeCleanup==="function") arcadeCleanup();
+  arcadeCleanup=null;
+}
+function openArcade(){
+  stopArcade();
+  arcadeModal.classList.add("show");
+  arcadeArea.innerHTML="";
+}
+$("phoneBtn").onclick=()=>{unlockAudio();sfx("click");openArcade()};
+$("closeArcade").onclick=()=>{stopArcade();currentArcadeGame=null;arcadeModal.classList.remove("show")};
+$("restartArcade").onclick=()=>{
+  if(currentArcadeGame){
+    sfx("click");
+    currentArcadeGame();
+  }
+};
+arcadeModal.addEventListener("click",e=>{if(e.target===arcadeModal)$("closeArcade").click()});
+
+
+let nextGameIndex=0;
+const nextGames=[
+  ()=>startDodge(),
+  ()=>startSnake(),
+  ()=>startTap(),
+  ()=>openMini("Library"),
+  ()=>openMini("Lab")
+];
+
+function showWinScreen(title,smart,rewardText,nextFn){
+  const old=document.getElementById("winScreen");
+  if(old)old.remove();
+
+  const screen=document.createElement("div");
+  screen.id="winScreen";
+  screen.className="winScreen";
+  screen.innerHTML=
+    '<div class="winCard">'+
+      '<div class="trophy">🏆</div>'+
+      '<h2>YOU WON!</h2>'+
+      '<div class="smart">'+title+'</div>'+
+      '<p>🎉 Congratulations! You completed the challenge.</p>'+
+      '<div class="reward">'+rewardText+'</div>'+
+      '<button class="next" id="playNextBtn">▶ PLAY NEXT GAME</button>'+
+      '<button class="again" id="playAgainBtn">🔄 PLAY AGAIN</button>'+
+    '</div>';
+
+  // Put the overlay inside whichever game container is active.
+  const host=document.getElementById("arcadeModal").classList.contains("show")
+    ? document.querySelector("#arcadeModal .modalbox")
+    : document.querySelector("#modal .modalbox");
+
+  host.style.position="relative";
+  host.appendChild(screen);
+
+  $("playNextBtn").onclick=()=>{
+    screen.remove();
+    if(nextFn)nextFn();
+    else{
+      nextGameIndex=(nextGameIndex+1)%nextGames.length;
+      nextGames[nextGameIndex]();
+    }
+  };
+  $("playAgainBtn").onclick=()=>{
+    screen.remove();
+    if(nextFn)nextFn();
+  };
+}
+
+function smartTitle(kind){
+  if(kind==="Library")return "🧠 SMART STUDENT!";
+  if(kind==="Lab")return "⚡ GENIUS MODE!";
+  if(kind==="Dodge")return "🏎️ PIXEL PRO!";
+  if(kind==="Snake")return "🐍 SNAKE MASTER!";
+  return "👾 ARCADE CHAMP!";
+}
+
+function arcadeReward(coins,xp,msg){
+  s.money+=coins;
+  gainXP(xp);
+  log("📱 Arcade WIN! "+msg+" +"+coins+" Money, +"+xp+" XP.");
+  sfx("success");
+  render();
+
+  let title="ARCADE CHAMP!";
+  if(currentArcadeGame===startDodge)title=smartTitle("Dodge");
+  else if(currentArcadeGame===startSnake)title=smartTitle("Snake");
+  else if(currentArcadeGame===startTap)title=smartTitle("Blast");
+
+  showWinScreen(
+    title,
+    "",
+    "💰 +"+coins+" Money & ⭐ +"+xp+" XP",
+    ()=>{
+      nextGameIndex=(nextGameIndex+1)%3;
+      [startDodge,startSnake,startTap][nextGameIndex]();
+    }
+  );
+}
+
+function makeCanvas(title,w,h){
+  arcadeArea.innerHTML=
+    '<h3 class="pixelTitle">'+title+'</h3>'+
+    '<canvas class="pixelCanvas" width="'+w+'" height="'+h+'"></canvas>'+
+    '<div class="arcadeInfo" id="arcadeScore"></div>';
+  return arcadeArea.querySelector("canvas");
+}
+function controls(html){
+  const d=document.createElement("div");d.className="pixelControls";d.innerHTML=html;arcadeArea.appendChild(d);return d;
+}
+function press(el,down,up){
+  ["pointerdown","touchstart","mousedown"].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();down()}, {passive:false}));
+  ["pointerup","pointercancel","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();up()}, {passive:false}));
+}
+
+$("pixelDodge").onclick=()=>startDodge();
+$("pixelSnake").onclick=()=>startSnake();
+$("pixelTap").onclick=()=>startTap();
+
+function startDodge(){
+  currentArcadeGame=startDodge;
+  stopArcade();
+  const c=makeCanvas("🚗 PIXEL DODGE",320,240),ctx=c.getContext("2d");
+  ctx.imageSmoothingEnabled=false;
+  let px=150,blocks=[],score=0,alive=true,left=false,right=false;
+  const key=e=>{
+    if(["ArrowLeft","a","A"].includes(e.key))left=e.type==="keydown";
+    if(["ArrowRight","d","D"].includes(e.key))right=e.type==="keydown";
+  };
+  addEventListener("keydown",key);addEventListener("keyup",key);
+
+  const ctl=controls('<button id="dleft">◀ LEFT</button><button id="dright">RIGHT ▶</button>');
+  press($("dleft"),()=>left=true,()=>left=false);
+  press($("dright"),()=>right=true,()=>right=false);
+
+  function hit(){
+    for(const b of blocks)
+      if(b.x<px+20&&b.x+20>px&&b.y<225&&b.y+20>205)return true;
+    return false;
+  }
+  const spawn=setInterval(()=>{if(alive)blocks.push({x:Math.floor(Math.random()*16)*20,y:-20})},430);
+  const loop=setInterval(()=>{
+    if(!alive)return;
+    if(left)px-=5;if(right)px+=5;px=Math.max(0,Math.min(300,px));
+    blocks.forEach(b=>b.y+=5);
+    const before=blocks.length;
+    blocks=blocks.filter(b=>b.y<240);
+    score+=before-blocks.length;
+    if(hit()){
+      alive=false;sfx("fail");
+      $("arcadeScore").textContent="💥 GAME OVER • Score "+score;
+      return;
+    }
+    ctx.fillStyle="#050505";ctx.fillRect(0,0,320,240);
+    ctx.fillStyle="#161616";
+    for(let y=20;y<240;y+=20)for(let xx=0;xx<320;xx+=20)ctx.fillRect(xx,y,1,1);
+    ctx.fillStyle="#73d2ff";ctx.fillRect(px,205,20,20);
+    ctx.fillStyle="#fff";ctx.fillRect(px+4,209,12,4);
+    ctx.fillStyle="#ff6961";blocks.forEach(b=>ctx.fillRect(b.x,b.y,20,20));
+    ctx.fillStyle="#fff";ctx.font="14px monospace";ctx.fillText("SCORE "+score,8,17);
+    $("arcadeScore").textContent="Keyboard: ← → / A D  •  Touch: buttons";
+    if(score>=20){
+      alive=false;clearInterval(loop);clearInterval(spawn);
+      arcadeReward(40,25,"20 blocks dodged!");
+    }
+  },30);
+  arcadeCleanup=()=>{clearInterval(loop);clearInterval(spawn);removeEventListener("keydown",key);removeEventListener("keyup",key)};
+}
+
+function startSnake(){
+  currentArcadeGame=startSnake;
+  stopArcade();
+
+  const c=makeCanvas("🐍 PIXEL SNAKE",320,320);
+  const ctx=c.getContext("2d");
+  ctx.imageSmoothingEnabled=false;
+
+  const N=16, C=20;
+  let snake=[
+    {x:8,y:8},
+    {x:7,y:8},
+    {x:6,y:8}
+  ];
+  let dir={x:1,y:0};
+  let queued={x:1,y:0};
+  let food={x:3,y:3};
+  let score=0;
+  let alive=true;
+  let speed=150;
+
+  function same(a,b){return a.x===b.x&&a.y===b.y}
+  function placeFood(){
+    let tries=0;
+    do{
+      food={
+        x:Math.floor(Math.random()*N),
+        y:Math.floor(Math.random()*N)
+      };
+      tries++;
+    }while(snake.some(p=>same(p,food)) && tries<500);
+  }
+
+  function setDir(dx,dy){
+    // Prevent an immediate 180° turn.
+    if(dx===-dir.x && dy===-dir.y)return;
+    if(dx===-queued.x && dy===-queued.y)return;
+    queued={x:dx,y:dy};
+  }
+
+  const key=e=>{
+    if(["ArrowUp","w","W"].includes(e.key)){e.preventDefault();setDir(0,-1)}
+    if(["ArrowDown","s","S"].includes(e.key)){e.preventDefault();setDir(0,1)}
+    if(["ArrowLeft","a","A"].includes(e.key)){e.preventDefault();setDir(-1,0)}
+    if(["ArrowRight","d","D"].includes(e.key)){e.preventDefault();setDir(1,0)}
+  };
+  addEventListener("keydown",key);
+
+  controls(
+    '<button id="sup">▲</button>'+
+    '<button id="sleft">◀</button>'+
+    '<button id="sdown">▼</button>'+
+    '<button id="sright">▶</button>'
+  );
+  const safePress=id=>{
+    const b=$(id);
+    b.onclick=()=>{ if(alive) { sfx("click"); } };
+    return b;
+  };
+  safePress("sup").addEventListener("click",()=>setDir(0,-1));
+  safePress("sdown").addEventListener("click",()=>setDir(0,1));
+  safePress("sleft").addEventListener("click",()=>setDir(-1,0));
+  safePress("sright").addEventListener("click",()=>setDir(1,0));
+
+  function draw(){
+    ctx.fillStyle="#050505";
+    ctx.fillRect(0,0,320,320);
+
+    // Pixel grid.
+    ctx.fillStyle="#101010";
+    for(let y=0;y<320;y+=20)
+      for(let x=0;x<320;x+=20)
+        ctx.fillRect(x,y,2,2);
+
+    // Food: unmistakable apple/power-up.
+    ctx.fillStyle="#ff3b30";
+    ctx.fillRect(food.x*C+3,food.y*C+4,14,13);
+    ctx.fillStyle="#fff";
+    ctx.fillRect(food.x*C+7,food.y*C+8,6,6);
+    ctx.fillStyle="#8ee38e";
+    ctx.fillRect(food.x*C+12,food.y*C+1,5,4);
+
+    // Snake.
+    snake.forEach((p,i)=>{
+      ctx.fillStyle=i===0?"#73d2ff":"#8ee38e";
+      ctx.fillRect(p.x*C+1,p.y*C+1,C-2,C-2);
+      if(i===0){
+        ctx.fillStyle="#111";
+        ctx.fillRect(p.x*C+5,p.y*C+5,3,3);
+        ctx.fillRect(p.x*C+12,p.y*C+5,3,3);
+      }
+    });
+
+    ctx.fillStyle="#fff";
+    ctx.font="bold 14px monospace";
+    ctx.fillText("SCORE "+score,8,17);
+  }
+
+  function step(){
+    if(!alive)return;
+    dir=queued;
+
+    // Endless wrap-around edges.
+    const head={
+      x:(snake[0].x+dir.x+N)%N,
+      y:(snake[0].y+dir.y+N)%N
+    };
+
+    // Self collision only. Moving into the current tail is allowed
+    // when the tail is going to move away on this tick.
+    const ate=same(head,food);
+    const bodyToCheck=ate?snake:snake.slice(0,-1);
+    if(bodyToCheck.some(p=>same(p,head))){
+      alive=false;
+      sfx("fail");
+      $("arcadeScore").textContent="💥 GAME OVER • Score "+score+" • Tap RESTART";
+      return;
+    }
+
+    snake.unshift(head);
+
+    if(ate){
+      score++;
+      sfx("coin");
+      placeFood();
+
+      // Speed up gently, but keep it playable.
+      speed=Math.max(70,150-score*5);
+      clearInterval(loop);
+      loop=setInterval(step,speed);
+
+      if(score>=10){
+        alive=false;
+        clearInterval(loop);
+        arcadeReward(55,35,"Snake score 10!");
+        return;
+      }
+    }else{
+      snake.pop();
+    }
+
+    draw();
+    $("arcadeScore").textContent=
+      "SCORE "+score+"/10 • Wrap-around mode • Arrow keys / WASD / touch";
+  }
+
+  let loop=setInterval(step,speed);
+  draw();
+  $("arcadeScore").textContent="SCORE 0/10 • Eat the red/white pixel • Edges wrap around";
+
+  arcadeCleanup=()=>{
+    clearInterval(loop);
+    removeEventListener("keydown",key);
+  };
+}
+
+function startTap(){
+  currentArcadeGame=startTap;
+  stopArcade();
+
+  const c=makeCanvas("👾 PIXEL BLAST",360,240);
+  const ctx=c.getContext("2d");
+  ctx.imageSmoothingEnabled=false;
+
+  let hits=0;
+  let time=20;
+  let active=true;
+  let target={x:140,y:90};
+
+  function moveTarget(){
+    target={
+      x:20+Math.floor(Math.random()*15)*20,
+      y:35+Math.floor(Math.random()*9)*20
+    };
+  }
+
+  function draw(){
+    ctx.fillStyle="#050505";
+    ctx.fillRect(0,0,360,240);
+
+    ctx.fillStyle="#151515";
+    for(let y=25;y<240;y+=20)
+      for(let x=0;x<360;x+=20)
+        ctx.fillRect(x,y,2,2);
+
+    // Large, easy-to-hit target.
+    ctx.fillStyle="#ff3b30";
+    ctx.fillRect(target.x,target.y,40,40);
+    ctx.fillStyle="#fff";
+    ctx.fillRect(target.x+8,target.y+8,24,24);
+    ctx.fillStyle="#ff3b30";
+    ctx.fillRect(target.x+15,target.y+15,10,10);
+
+    ctx.fillStyle="#fff";
+    ctx.font="bold 14px monospace";
+    ctx.fillText("HITS "+hits+"/12",8,17);
+  }
+
+  function hitTarget(){
+    if(!active)return;
+    hits++;
+    sfx("click");
+
+    if(hits>=12){
+      active=false;
+      clearInterval(timer);
+      arcadeReward(60,40,"12 targets destroyed!");
+      return;
+    }
+
+    moveTarget();
+    draw();
+    $("arcadeScore").textContent="HITS "+hits+"/12 • "+time+"s";
+  }
+
+  // Pointer events work with mouse, touchscreen and stylus.
+  const pointer=e=>{
+    if(!active)return;
+    e.preventDefault();
+
+    const r=c.getBoundingClientRect();
+    const scaleX=c.width/r.width;
+    const scaleY=c.height/r.height;
+    const mx=(e.clientX-r.left)*scaleX;
+    const my=(e.clientY-r.top)*scaleY;
+
+    if(mx>=target.x && mx<=target.x+40 &&
+       my>=target.y && my<=target.y+40){
+      hitTarget();
+    }
+  };
+  c.addEventListener("pointerdown",pointer,{passive:false});
+
+  controls(
+    '<button id="blastMove">🔄 MOVE TARGET</button>'+
+    '<button id="blastFire">💥 HIT TARGET</button>'
+  );
+
+  $("blastMove").onclick=()=>{
+    if(!active)return;
+    moveTarget();
+    draw();
+    sfx("click");
+  };
+
+  // Mobile/PC fallback: HIT TARGET hits the currently displayed target.
+  $("blastFire").onclick=()=>{
+    if(active)hitTarget();
+  };
+
+  const hint=document.createElement("div");
+  hint.className="pixelTargetHint";
+  hint.textContent="Click/tap the red target • or use HIT TARGET";
+  arcadeArea.appendChild(hint);
+
+  moveTarget();
+  draw();
+  $("arcadeScore").textContent="HITS 0/12 • 20s";
+
+  const timer=setInterval(()=>{
+    if(!active)return;
+    time--;
+    $("arcadeScore").textContent="HITS "+hits+"/12 • "+time+"s";
+    if(time<=0){
+      active=false;
+      clearInterval(timer);
+      sfx("fail");
+      $("arcadeScore").textContent="⏰ TIME UP • "+hits+"/12 • Tap RESTART";
+    }
+  },1000);
+
+  arcadeCleanup=()=>{
+    clearInterval(timer);
+    c.removeEventListener("pointerdown",pointer);
+  };
+}
+
+render();log("Welcome to Campus Chaos. Everything is clickable.");
+setInterval(tick,1000);
+setInterval(saveState,15000);
+</script>
+<div style="text-align:center;padding:18px;font-family:monospace;font-weight:900;letter-spacing:2px">THIRAZEN™ • CAMPUS CHAOS: PIXEL SEMESTER</div></body>
+</html>
