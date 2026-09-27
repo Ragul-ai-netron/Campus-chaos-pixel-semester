@@ -2,6 +2,8 @@
 
 # 🎮 Campus Chaos: Pixel Semester
 
+![Campus Chaos Gameplay](./campus-chaos-demo.gif)
+
 ### **Study. Hustle. Chill. Level Up.**
 
 **A pixel-inspired student-life browser game by THIRAZEN™**
